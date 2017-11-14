@@ -1,4 +1,4 @@
-
+var resetFilters = null;
 
 Papa.parse("data.csv", {
   download: true, skipEmptyLines: true, dynamicTyping: true, header: true,
@@ -59,8 +59,7 @@ Papa.parse("data.csv", {
 
     Plotly.plot(map, [{}],
     {
-      title: "Plotly.js + Crossfilter.js",
-      dragmode: "lasso", margin: {r:0,b:0,t:80,l:0}, height: 300,
+      dragmode: "lasso", margin: {r:0,b:0,t:0,l:0}, height: 250,
       geo: { projection: { type: 'robinson' } }
     });
 
@@ -138,6 +137,16 @@ Papa.parse("data.csv", {
       }
       redraw();
     });
+
+    resetFilters = function() {
+      gdp_range = [-Infinity, Infinity];
+      im_range = [-Infinity, Infinity];
+      country_range = [];
+      im.filter(im_range);
+      gdp.filter(gdp_range);
+      country.filterAll();
+      redraw();
+    };
 
     //do the initial draw with no filters
     redraw();

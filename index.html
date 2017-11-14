@@ -6,9 +6,34 @@
         <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/crossfilter/1.3.12/crossfilter.min.js"></script>
         <script type="text/javascript" src="script.js"></script>
-    </head>
-    <body>
 
+        <link href="https://fonts.googleapis.com/css?family=Dosis|Open+Sans" rel="stylesheet">
+        <style>
+            p {
+                font-family: 'Open Sans',sans-serif;
+                font-size: 16px;
+                line-height: 26px;
+            }
+
+              h2 {
+                font-size: 34px;
+                line-height: 44px;
+                font-family: 'Dosis',sans-serif;
+              }
+        </style>
+    </head>
+    <body style="text-align: center;">
+        <h2>Plotly.js + Crossfilter.js</h2>
+
+        <div  style="max-width: 900px; margin: 0 auto;">
+        <p>This is a simple demo of <a href="https://plot.ly/javascript/" target="_blank">Plotly.js</a> working with <a href="http://square.github.io/crossfilter/" target="_blank">Crossfilter.js</a>, with code available on <a href="https://github.com/plotly/plotly.js-crossfilter.js" target="_blank">Github</a>. <br /> Click and drag on any visualization and you'll see the data update on the other two to reflect the narrowed-down selection of countries. Double-click to clear the filter.</p>
+        <p><span style="background: #66F; color: white">Blue</span> indicates data within the intersection of all the filters, <br /><span style="background: #DDD">light grey</span> indicates data filtered out by another visualization's filter, and <br /><span style="background: #BBB">grey</span> indicates data filtered out by that visualization's filter.<br /><br />
+        <button onclick="resetFilters()" style="font-size: 16px">click here to reset filters</button> </p>
+
+        </div>
+
+        <br />
+        <br />
         <table style="width: 900px; margin: 0 auto;">
         <tr>
             <td colspan="2" align="center">
