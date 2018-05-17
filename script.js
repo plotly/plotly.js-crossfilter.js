@@ -65,14 +65,14 @@ Papa.parse("data.csv", {
 
     //define redraw to call on crossfilter
     function redraw() {
-      Plotly.deleteTraces(hist_im, 1);
+      Plotly.deleteTraces(hist_im, 1).catch(function(){});
       Plotly.addTraces(hist_im, [{
         type: 'bar',
         x: unpack(ims.all(), "key"),
         y: unpack(ims.all(), "value"),
         marker: {color: ims.all().map(function(d) {
             return im_range[0] < d.key && d.key< im_range[1] ? '#66F':'#BBB'; }) }
-      }]);
+      }]).catch(function(){});
 
       Plotly.relayout(hist_im, {
         shapes: !isFinite(im_range[0]) ? null : [{
@@ -82,14 +82,14 @@ Papa.parse("data.csv", {
         }]
       });
 
-      Plotly.deleteTraces(hist_gdp, 1)
+      Plotly.deleteTraces(hist_gdp, 1).catch(function(){});
       Plotly.addTraces(hist_gdp, [{
         type: 'bar',
         x: unpack(gdps.all(), "key"),
         y: unpack(gdps.all(), "value"),
         marker: {color: gdps.all().map(function(d) {
           return gdp_range[0] < d.key && d.key < gdp_range[1] ? '#66F':'#BBB'}) }
-      }]);
+      }]).catch(function(){});
 
       Plotly.relayout(hist_gdp, {
         shapes: !isFinite(gdp_range[0]) ? null : [{
@@ -99,7 +99,7 @@ Papa.parse("data.csv", {
         }]
       });
 
-      Plotly.deleteTraces(map, 0);
+      Plotly.deleteTraces(map, 0).catch(function(){});
       Plotly.addTraces(map, [{
         type: 'choropleth',
         locationmode: 'ISO-3',
@@ -110,23 +110,27 @@ Papa.parse("data.csv", {
           return country_range.indexOf(d.key) != -1 ? 1 : 0.5}),
         showscale: false, zmin: 0, zmax: 1,
         colorscale: [ [0, '#DDD'], [0.5, '#BBB'], [1, '#66F'] ]
-      }]);
+      }]).catch(function(){});
     }
 
     //set up selection listeners
-    hist_im.on('plotly_selected', function(e) {
+    function hist_im_select(e) {
       im_range = e ? [e.range.x[0], e.range.x[1]] : [-Infinity, Infinity];
       im.filter(im_range);
       redraw();
-    });
+    }
+    hist_im.on('plotly_selected', hist_im_select);
+    hist_im.on('plotly_selecting', hist_im_select);
 
-    hist_gdp.on('plotly_selected', function(e) {
+    function hist_gdp_select(e) {
       gdp_range = e ? [e.range.x[0], e.range.x[1]] : [-Infinity, Infinity];
       gdp.filter(gdp_range);
       redraw();
-    });
+    }
+    hist_gdp.on('plotly_selected', hist_gdp_select);
+    hist_gdp.on('plotly_selecting', hist_gdp_select);
 
-    map.on('plotly_selected', function(e) {
+    function map_select(e) {
       if(e && e.points.length != 0) {
         country_range = unpack(e.points, "location");
         country.filter(function(d) {return country_range.indexOf(d) != -1;})
@@ -136,7 +140,10 @@ Papa.parse("data.csv", {
         country.filterAll();
       }
       redraw();
-    });
+    }
+
+    map.on('plotly_selecting', map_select);
+    map.on('plotly_selecting', map_select);
 
     resetFilters = function() {
       gdp_range = [-Infinity, Infinity];
