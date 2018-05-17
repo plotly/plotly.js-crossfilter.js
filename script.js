@@ -29,18 +29,13 @@ Papa.parse("data.csv", {
       country_range = [];
 
     //create plots with placeholder series
-    Plotly.plot(hist_im, [{
+
+    var all_im = {
         type: 'bar',
         x: ims.all().map(function(d) { return d.key; }),
         y: ims.all().map(function(d) { return d.value; }),
         marker: {color: '#DDD'}
-      }, {}],
-      {
-        title: "Infant Mortality",
-        yaxis: {"title": "# Countries"}, xaxis: {"title": "Mortality per 1,000 births"},
-        width: 450, height: 300, margin: {r:20,b:40,t:80,l:40},
-        barmode: "overlay", hovermode: false, showlegend: false, dragmode: "select"
-      });
+      };
 
 
     Plotly.plot(hist_gdp, [{
@@ -65,22 +60,25 @@ Papa.parse("data.csv", {
 
     //define redraw to call on crossfilter
     function redraw() {
-      Plotly.deleteTraces(hist_im, 1).catch(function(){});
-      Plotly.addTraces(hist_im, [{
+
+      Plotly.react(hist_im, [all_im, {
         type: 'bar',
         x: unpack(ims.all(), "key"),
         y: unpack(ims.all(), "value"),
         marker: {color: ims.all().map(function(d) {
             return im_range[0] < d.key && d.key< im_range[1] ? '#66F':'#BBB'; }) }
-      }]).catch(function(){});
-
-      Plotly.relayout(hist_im, {
+      }],
+      {
+        title: "Infant Mortality",
+        yaxis: {"title": "# Countries"}, xaxis: {"title": "Mortality per 1,000 births"},
+        width: 450, height: 300, margin: {r:20,b:40,t:80,l:40},
+        barmode: "overlay", hovermode: false, showlegend: false, dragmode: "select",
         shapes: !isFinite(im_range[0]) ? null : [{
             type: 'rect', xref: 'x', yref: 'paper',
             x0: im_range[0], x1: im_range[1], y0: 0, y1: 1,
             fillcolor: '#d3d3d3', opacity: 0.2, line: { width: 0 }
         }]
-      });
+      }).catch(function(){});
 
       Plotly.deleteTraces(hist_gdp, 1).catch(function(){});
       Plotly.addTraces(hist_gdp, [{
@@ -112,6 +110,9 @@ Papa.parse("data.csv", {
         colorscale: [ [0, '#DDD'], [0.5, '#BBB'], [1, '#66F'] ]
       }]).catch(function(){});
     }
+
+    //do the initial draw with no filters
+    redraw();
 
     //set up selection listeners
     function hist_im_select(e) {
@@ -155,8 +156,6 @@ Papa.parse("data.csv", {
       redraw();
     };
 
-    //do the initial draw with no filters
-    redraw();
 
   }
 });
