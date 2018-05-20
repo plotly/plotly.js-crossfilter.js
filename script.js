@@ -142,7 +142,7 @@ Papa.parse("data.csv", {
       redraw();
     }
 
-    map.on('plotly_selecting', map_select);
+    map.on('plotly_selected', map_select);
     map.on('plotly_selecting', map_select);
 
     resetFilters = function() {
