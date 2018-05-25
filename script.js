@@ -156,8 +156,9 @@ Papa.parse("data.csv", {
       redraw(react ? null: "map");
     }
 
-    map.on('plotly_selected', map_select);
-    map.on('plotly_selecting', map_select);
+    map.on('plotly_selected',doReact(map_select));
+    map.on('plotly_doubleclick',  doReact(map_select));
+    map.on('plotly_selecting', noReact(map_select));
 
     resetFilters = function() {
       gdp_range = [-Infinity, Infinity];
