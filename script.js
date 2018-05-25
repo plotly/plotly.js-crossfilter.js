@@ -30,85 +30,83 @@ Papa.parse("data.csv", {
 
     //create plots with placeholder series
 
-    var all_im = {
-        type: 'bar',
-        x: ims.all().map(function(d) { return d.key; }),
-        y: ims.all().map(function(d) { return d.value; }),
-        marker: {color: '#DDD'}
+
+    function getXY(arr) {
+      return { x: unpack(arr, "key"), y: unpack(arr, "value") }
+    };
+
+    function makeBars(coords, range, onColor, offColor) {
+      return {
+        type: 'bar', x: coords.x, y: coords.y,
+        marker: {color: coords.x.map(function(x) {
+          return range[0] < x && x < range[1] ? onColor : offColor; })
+        },
       };
+    }
 
+    function makeShapes(range) {
+      return !isFinite(range[0]) ? null : [{
+        type: 'rect', xref: 'x', yref: 'paper',
+        x0: range[0], x1: range[1], y0: 0, y1: 1,
+        fillcolor: '#d3d3d3', opacity: 0.2, line: { width: 0 }
+      }]
+    }
 
-    Plotly.plot(hist_gdp, [{
-        type: 'bar',
-        x: gdps.all().map(function(d) { return d.key; }),
-        y: gdps.all().map(function(d) { return d.value; }),
-        marker: {color: '#DDD'}
-      }, {}],
-      {
-        title: "GDP per Capita",
-        yaxis: {"title": "# Countries"}, xaxis: {"title": "current USD"},
-        width: 450, height: 300, margin: {r:20,b:40,t:80,l:40},
-        barmode: "overlay", hovermode: false, showlegend: false, dragmode: "select"
-      });
+    var all_im = getXY(ims.all());
+    var all_gdp = getXY(gdps.all());
 
-
-    Plotly.plot(map, [{}],
-    {
-      dragmode: "lasso", margin: {r:0,b:0,t:0,l:0}, height: 250,
-      geo: { projection: { type: 'robinson' } }
-    });
+    var in_all = "#66F",
+        in_none = "#EEE",
+        in_here = "#CCC",
+        in_there = "#CCF";
 
     //define redraw to call on crossfilter
     function redraw() {
-
-      Plotly.react(hist_im, [all_im, {
-        type: 'bar',
-        x: unpack(ims.all(), "key"),
-        y: unpack(ims.all(), "value"),
-        marker: {color: ims.all().map(function(d) {
-            return im_range[0] < d.key && d.key< im_range[1] ? '#66F':'#BBB'; }) }
-      }],
+      Plotly.react(hist_im, [
+        makeBars(all_im, im_range, in_there, in_none),
+        makeBars(getXY(ims.all()), im_range, in_all, in_here)
+      ],
       {
         title: "Infant Mortality",
         yaxis: {"title": "# Countries"}, xaxis: {"title": "Mortality per 1,000 births"},
-        width: 450, height: 300, margin: {r:20,b:40,t:80,l:40},
+        width: 450, height: 300, margin: {r:20,b:40,t:80,l:40}, selectdirection: "h",
         barmode: "overlay", hovermode: false, showlegend: false, dragmode: "select",
-        shapes: !isFinite(im_range[0]) ? null : [{
-            type: 'rect', xref: 'x', yref: 'paper',
-            x0: im_range[0], x1: im_range[1], y0: 0, y1: 1,
-            fillcolor: '#d3d3d3', opacity: 0.2, line: { width: 0 }
-        }]
-      }).catch(function(){});
+        shapes: makeShapes(im_range)
+      })
 
-      Plotly.deleteTraces(hist_gdp, 1).catch(function(){});
-      Plotly.addTraces(hist_gdp, [{
-        type: 'bar',
-        x: unpack(gdps.all(), "key"),
-        y: unpack(gdps.all(), "value"),
-        marker: {color: gdps.all().map(function(d) {
-          return gdp_range[0] < d.key && d.key < gdp_range[1] ? '#66F':'#BBB'}) }
-      }]).catch(function(){});
+      Plotly.react(hist_gdp, [
+        makeBars(all_gdp, gdp_range, in_there, in_none),
+        makeBars(getXY(gdps.all()), gdp_range, in_all, in_here)
+      ],
+      {
+        title: "GDP per Capita",
+        yaxis: {"title": "# Countries"}, xaxis: {"title": "current USD"},
+        width: 450, height: 300, margin: {r:20,b:40,t:80,l:40}, selectdirection: "h",
+        barmode: "overlay", hovermode: false, showlegend: false, dragmode: "select",
+        shapes: makeShapes(gdp_range)
+      })
 
-      Plotly.relayout(hist_gdp, {
-        shapes: !isFinite(gdp_range[0]) ? null : [{
-            type: 'rect', xref: 'x', yref: 'paper',
-            x0: gdp_range[0], x1: gdp_range[1], y0: 0, y1: 1,
-            fillcolor: '#d3d3d3', opacity: 0.2, line: { width: 0 }
-        }]
-      });
-
-      Plotly.deleteTraces(map, 0).catch(function(){});
-      Plotly.addTraces(map, [{
+      Plotly.react(map, [{
         type: 'choropleth',
         locationmode: 'ISO-3',
         locations: unpack(countries.all(), "key"),
         z: countries.all().map(function(d){
-          if(d.value == 0) return 0;
-          if(country_range.length == 0) return 1;
-          return country_range.indexOf(d.key) != -1 ? 1 : 0.5}),
+          if(d.value == 0) { // excluded here
+            if(country_range.length == 0) return 0.25;
+            return country_range.indexOf(d.key) != -1 ? 0.25 : 0;
+          }
+          else { // included here
+            if(country_range.length == 0) return 1;
+            return country_range.indexOf(d.key) != -1 ? 1 : 0.5
+          }
+        }),
         showscale: false, zmin: 0, zmax: 1,
-        colorscale: [ [0, '#DDD'], [0.5, '#BBB'], [1, '#66F'] ]
-      }]).catch(function(){});
+        colorscale: [[0, in_none],  [0.25, in_there], [0.5, in_here], [1, in_all] ]
+      }],
+      {
+        dragmode: "lasso", margin: {r:0,b:0,t:0,l:0}, height: 250,
+        geo: { projection: { type: 'robinson' } }
+      })
     }
 
     //do the initial draw with no filters
@@ -120,7 +118,9 @@ Papa.parse("data.csv", {
       im.filter(im_range);
       redraw();
     }
+
     hist_im.on('plotly_selected', hist_im_select);
+    hist_im.on('plotly_doubleclick', hist_im_select);
     hist_im.on('plotly_selecting', hist_im_select);
 
     function hist_gdp_select(e) {
@@ -128,7 +128,8 @@ Papa.parse("data.csv", {
       gdp.filter(gdp_range);
       redraw();
     }
-    hist_gdp.on('plotly_selected', hist_gdp_select);
+    hist_gdp.on('plotly_selected',  hist_gdp_select);
+    hist_gdp.on('plotly_doubleclick',  hist_gdp_select);
     hist_gdp.on('plotly_selecting', hist_gdp_select);
 
     function map_select(e) {
@@ -143,7 +144,7 @@ Papa.parse("data.csv", {
       redraw();
     }
 
-    map.on('plotly_selected', map_select);
+    map.on('plotly_selected',  map_select);
     map.on('plotly_selecting', map_select);
 
     resetFilters = function() {
