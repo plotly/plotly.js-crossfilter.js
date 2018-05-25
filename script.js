@@ -30,34 +30,35 @@ Papa.parse("data.csv", {
 
     //create plots with placeholder series
 
+    function getXY(arr) {
+      return { x: unpack(arr, "key"), y: unpack(arr, "value") }
+    };
 
-    var all_im = {
-        type: 'bar',
-        x: ims.all().map(function(d) { return d.key; }),
-        y: ims.all().map(function(d) { return d.value; }),
-        marker: {color: '#DDD'},
-        selected: { marker: {color: '#DDD'} }
+    function makeBars(coords, range, onColor, offColor) {
+      return {
+        type: 'bar', x: coords.x, y: coords.y,
+        marker: {color: coords.x.map(function(x) {
+          return range[0] < x && x < range[1] ? onColor : offColor; })
+        },
       };
+    }
 
-    var all_gdp = {
-        type: 'bar',
-        x: gdps.all().map(function(d) { return d.key; }),
-        y: gdps.all().map(function(d) { return d.value; }),
-        marker: {color: '#DDD'},
-        selected: { marker: {color: '#DDD'} }
-      };
+    var all_im = getXY(ims.all());
+    var all_gdp = getXY(gdps.all());
+
+    var in_all = "#66F",
+        in_none = "#EEE",
+        in_here = "#CCC",
+        in_there = "#CCF";
 
     //define redraw to call on crossfilter
     function redraw(source) {
-
       if(source != "im") {
-        Plotly.react(hist_im, [all_im, {
-          type: 'bar',
-          x: unpack(ims.all(), "key"),
-          y: unpack(ims.all(), "value"),
-          marker: {color: ims.all().map(function(d) {
-              return im_range[0] < d.key && d.key< im_range[1] ? '#66F':'#CCF'; }) }
-        }],
+        var filtered_im = getXY(ims.all());
+        Plotly.react(hist_im, [
+          makeBars(all_im, im_range, in_there, in_none),
+          makeBars(getXY(ims.all()), im_range, in_all, in_here)
+        ],
         {
           title: "Infant Mortality",
           yaxis: {"title": "# Countries"}, xaxis: {"title": "Mortality per 1,000 births"},
@@ -75,13 +76,10 @@ Papa.parse("data.csv", {
       });
 
       if(source != "gdp") {
-        Plotly.react(hist_gdp, [all_gdp, {
-          type: 'bar',
-          x: unpack(gdps.all(), "key"),
-          y: unpack(gdps.all(), "value"),
-          marker: {color: gdps.all().map(function(d) {
-            return gdp_range[0] < d.key && d.key < gdp_range[1] ? '#66F':'#CCF'}) }
-        }],
+        Plotly.react(hist_gdp, [
+          makeBars(all_gdp, gdp_range, in_there, in_none),
+          makeBars(getXY(gdps.all()), gdp_range, in_all, in_here)
+        ],
         {
           title: "GDP per Capita",
           yaxis: {"title": "# Countries"}, xaxis: {"title": "current USD"},
@@ -104,11 +102,17 @@ Papa.parse("data.csv", {
           locationmode: 'ISO-3',
           locations: unpack(countries.all(), "key"),
           z: countries.all().map(function(d){
-            if(d.value == 0) return 0;
-            if(country_range.length == 0) return 1;
-            return country_range.indexOf(d.key) != -1 ? 1 : 0.5}),
+            if(d.value == 0) { // excluded here
+              if(country_range.length == 0) return 0.25;
+              return country_range.indexOf(d.key) != -1 ? 0.25 : 0;
+            }
+            else { // included here
+              if(country_range.length == 0) return 1;
+              return country_range.indexOf(d.key) != -1 ? 1 : 0.5
+            }
+          }),
           showscale: false, zmin: 0, zmax: 1,
-          colorscale: [ [0, '#DDD'], [0.5, '#CCF'], [1, '#66F'] ]
+          colorscale: [[0, in_none],  [0.25, in_there], [0.5, in_here], [1, in_all] ]
         }],
         {
           dragmode: "lasso", margin: {r:0,b:0,t:0,l:0}, height: 250,
