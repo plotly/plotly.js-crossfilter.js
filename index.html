@@ -9,34 +9,48 @@
 
         <link href="https://fonts.googleapis.com/css?family=Dosis|Open+Sans" rel="stylesheet">
         <style>
-            p {
+            * {
                 font-family: 'Open Sans',sans-serif;
                 font-size: 16px;
                 line-height: 26px;
             }
 
-              h2 {
+            h2 {
                 font-size: 34px;
                 line-height: 44px;
                 font-family: 'Dosis',sans-serif;
               }
+              h3 {
+                font-size: 20px;
+                line-height: 44px;
+                font-family: 'Dosis',sans-serif;
+              }
+              td {width: 210px; height: 60px; font-size: 12px; line-height: 1.5}
+              th {font-size: 14px; font-weight: normal;}
         </style>
     </head>
     <body style="text-align: center;">
         <h2>Plotly.js + Crossfilter.js</h2>
 
         <div  style="max-width: 900px; margin: 0 auto;">
-        <p>This is a simple demo of <a href="https://plot.ly/javascript/" target="_blank">Plotly.js</a> working with <a href="http://square.github.io/crossfilter/" target="_blank">Crossfilter.js</a> using <a href="http://databank.worldbank.org/data/reports.aspx?source=world-development-indicators#" target="_blank">World Bank data</a> with code available on <a href="https://github.com/plotly/plotly.js-crossfilter.js" target="_blank">Github</a>. <br /> Click and drag on any visualization to narrow down the filter and you'll see the data update on the other two to reflect the narrowed-down selection of countries. Double-click on a visualization to clear that filter.</p>
-        <p>
-            <span style="background: #66F; color: white">Blue</span> indicates
-                countries included in every graphics' filter, <br />
-            <span style="background: #CCF">Light Blue</span> indicates
-                countries excluded by another graphic's filter but not this one's, and<br />
-            <span style="background: #CCC">Grey</span> indicates
-                countries excluded by this graphic's filter only,  <br />
-            <span style="background: #EEE">Light Grey</span> indicates
-                countries excluded by this graphic's filter and one or more others. <br />            <br />
-        <button onclick="window.resetFilters()" style="font-size: 16px">click here to reset filters</button> </p>
+        <p>This is a simple demo of <a href="https://plot.ly/javascript/" target="_blank">Plotly.js</a> working with <a href="http://square.github.io/crossfilter/" target="_blank">Crossfilter.js</a> using <a href="http://databank.worldbank.org/data/reports.aspx?source=world-development-indicators#" target="_blank">World Bank data</a> with code available on <a href="https://github.com/plotly/plotly.js-crossfilter.js" target="_blank">Github</a>. <br /> Click and drag on any visualization to narrow down the selection and you'll see the data update on the other two to reflect the narrowed-down selection of countries. Double-click on a visualization to reset that graphic's selection to "all".</p>
+
+        <p>Countries are shown in one of 4 colors in any given graphic, based on its selection status:</p>
+
+
+        <table style="width: 550px; margin: 0 auto;" cellpadding=0>
+
+            <tr><th colspan="2" rowspan="2">&nbsp;</th><th colspan="2">selected in every other graphic?</th></tr>
+            <tr><th>yes</th><th>no</th></tr>
+            <tr><th rowspan="2">selected <br>in this <br>graphic?</th><th>yes</th>
+
+                <td style="background: #66F; color: white">selected in every graphic</td>
+                    <td style="background: #CCF">selected in this graphic <br>but not every other</td></tr>
+            <tr><th>no</th><td style="background: #CCC">not selected in this graphic <br> but selected in every other</td><td style="background: #EEE">not selected in this graphic<br> and not selected at least one other</td></tr>
+        </table>
+
+        <br />            <br />
+        <button onclick="window.resetFilters()" style="font-size: 16px">click here to reset selections</button>
 
         </div>
 
