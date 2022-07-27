@@ -110,6 +110,7 @@ Papa.parse("data.csv", {
 
     //set up selection listeners
     function hist_im_select(e) {
+      if(e && !e.range) return;
       im_range = e ? [e.range.x[0], e.range.x[1]] : [-Infinity, Infinity];
       im.filter(im_range);
       react();
@@ -120,6 +121,7 @@ Papa.parse("data.csv", {
     hist_im.on('plotly_selecting',   hist_im_select);
 
     function hist_gdp_select(e) {
+      if(e && !e.range) return;
       gdp_range = e ? [e.range.x[0], e.range.x[1]] : [-Infinity, Infinity];
       gdp.filter(gdp_range);
       react();
