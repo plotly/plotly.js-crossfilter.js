@@ -132,6 +132,7 @@ Papa.parse("data.csv", {
     hist_gdp.on('plotly_selecting',   hist_gdp_select);
 
     function map_select(e) {
+      if(e && !e.points) return;
       if(e && e.points.length != 0) {
         country_range = unpack(e.points, "location");
         country.filter(function(d) {return country_range.indexOf(d) != -1;})
